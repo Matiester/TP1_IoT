@@ -96,7 +96,7 @@ async def destellar(tiempo):
 #----------------------------------Mensaje de Error-----------------------------
 
 async def mensaje_error():
-    await client.publish(id, "Ingresaste un valor erroneo. Prueba:\n\tModo: 1-Manual 0-Automatico\n\tDestello: tiempo en segundos o nada\n\tPeriodo: valor numerico en segundos\n\tSetpoint: valor numerico (usar punto para los decimales)", qos = 1)
+    await client.publish(id, "Ingresaste un valor erroneo. Prueba:\n\tModo: 1-Manual 0-Automatico\n\tDestello: tiempo en segundos o nada\n\tPeriodo: valor numerico en segundos\n\tSetpoint: valor numerico (usar punto para los decimales)\n\trele: true o false (para encender o apagar en modo manual)", qos = 1)
 
 #-------------------------------- MQTTA ---------------------------------------
 
