@@ -159,7 +159,7 @@ def sub_cb(topic, msg, retained):
             print(f"Nuevo estado del relé: {rele}")
             escribir("rele",rele)
             rele_manual(rele)
-        except ValueError:
+        except Exception:
             asyncio.create_task(mensaje_error())
 
 async def conn_han(client):
