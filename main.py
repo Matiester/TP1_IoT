@@ -61,7 +61,7 @@ Parametros = cargar_config()
 print("Parametros cargados")
 
 #-------------------------------- Sensor -----------------------------------------------
-d = dht.DHT22(Pin(15)) 
+d = dht.DHT11(Pin(15)) 
 
 def sensor():
     d.measure()
@@ -93,6 +93,11 @@ async def destellar(tiempo):
         Pin_LED.value(False)
         await asyncio.sleep(tiempo/(2*tiempo*5))
 
+#----------------------------------Mensaje de Error-----------------------------
+
+async def mensaje_error():
+    await client.publish(id, "Ingresaste un valor erroneo. Prueba:\n\tModo: 1-Manual 0-Automatico\n\tDestello: tiempo en segundos o nada\n\tPeriodo: valor numerico en segundos\n\tSetpoint: valor numerico (usar punto para los decimales)", qos = 1)
+
 #-------------------------------- MQTTA ---------------------------------------
 
 #Funcion para formar el mensaje que se transmite
@@ -116,31 +121,46 @@ def sub_cb(topic, msg, retained):
     print(f"Topic = {topic} | Mensaje = {msg} | Retained = {retained}")
 
     if topic.endswith("periodo"):
-        periodo = int(msg)
-        print(f"Nuevo periodo: {periodo}")
-        escribir("periodo",periodo)
+        try:
+            periodo = int(msg)
+            print(f"Nuevo periodo: {periodo}")
+            escribir("periodo",periodo)
+        except ValueError:
+            asyncio.create_task(mensaje_error())
 
     elif topic.endswith("setpoint"):
-        setpoint = float(msg)
-        print(f"Nuevo setpoint: {setpoint}")
-        escribir("setpoint",setpoint)
+        try:
+            setpoint = float(msg)
+            print(f"Nuevo setpoint: {setpoint}")
+            escribir("setpoint",setpoint)
+        except ValueError:
+            asyncio.create_task(mensaje_error())
 
     elif topic.endswith("modo"):
-        modo = int(msg)
-        print(f"Nuevo modo: {modo}")
-        escribir("modo",modo)
+        try:
+            modo = int(msg)
+            print(f"Nuevo modo: {modo}")
+            escribir("modo",modo)
+        except ValueError:
+            asyncio.create_task(mensaje_error())
 
     elif topic.endswith("destello"):
-        tiempo=int(msg)
-        print(f"Destello")
+        try:
+            tiempo = int(msg)
+        except ValueError:
+            tiempo = 3
+        print("Destello")
         asyncio.create_task(destellar(tiempo))
         
 
     elif topic.endswith("rele"):
-        rele = msg.lower() == "true"
-        print(f"Nuevo estado del relé: {rele}")
-        escribir("rele",rele)
-        rele_manual(rele)
+        try:
+            rele = msg.lower() == "true"
+            print(f"Nuevo estado del relé: {rele}")
+            escribir("rele",rele)
+            rele_manual(rele)
+        except ValueError:
+            asyncio.create_task(mensaje_error())
 
 async def conn_han(client):
     await client.subscribe(id+"/periodo", 1)
@@ -171,11 +191,10 @@ config['subs_cb'] = sub_cb
 config['server'] = SERVER
 config['connect_coro'] = conn_han
 config['wifi_coro'] = wifi_han
-config['queue_len'] = 1
 config['ssl'] = True
 
 # Set up client
-MQTTClient.DEBUG = False  # Optional
+MQTTClient.DEBUG = True  # Optional
 client = MQTTClient(config)
 try:
     asyncio.run(main(client))
