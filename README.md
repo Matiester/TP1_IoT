@@ -7,7 +7,7 @@ Perfecto, acá tenés una versión más simple y directa del README:
 El dispositivo se controla enviando mensajes a estos topics:
 
 - `id/modo` → `1` para manual, `0` para automático  
-- `id/destello` → tiempo en segundos o vacío para apagar  
+- `id/destello` → tiempo en segundos o vacío para el tiempo por defecto
 - `id/periodo` → número en segundos  
 - `id/setpoint` → número (usar punto decimal, ej: `23.5`)  
 - `id/rele` → `true` o `false` (solo en modo manual)
